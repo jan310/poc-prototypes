@@ -28,3 +28,11 @@ services:
     container_name: event-producer
     depends_on:
       - broker
+      
+  event-service-sse:
+    image: jan310/event-service-sse:latest
+    container_name: event-service-sse
+    ports:
+      - "8080:8080"
+    depends_on:
+      - event-producer
