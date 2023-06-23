@@ -1,5 +1,6 @@
 version: '3'
 services:
+
   mqtt-broker:
     image: eclipse-mosquitto
     container_name: mqtt-broker
@@ -15,9 +16,9 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
 
-  broker:
+  kafka-broker:
     image: confluentinc/cp-kafka:latest
-    container_name: broker
+    container_name: kafka-broker
     ports:
       - "9092:9092"
     depends_on:
@@ -26,7 +27,7 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://broker:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka-broker:29092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
@@ -35,11 +36,11 @@ services:
     image: jan310/event-producer:latest
     container_name: event-producer
     depends_on:
-      - broker
+      - kafka-broker
       
-  #event-service-mqtt:
-    #image: jan310/event-service-mqtt:latest
-    #container_name: event-service-mqtt
-    #depends_on:
-      #- mqtt-broker
-      #- event-producer
+  event-service-mqtt:
+    image: jan310/event-service-mqtt:latest
+    container_name: event-service-mqtt
+    depends_on:
+      - mqtt-broker
+      - event-producer

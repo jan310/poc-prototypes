@@ -15,7 +15,8 @@ class EventProducerApplication(private val kafkaTemplate: KafkaTemplate<String, 
 
     @Scheduled(fixedRate = 1000)
     fun publishEvent() {
-        kafkaTemplate.send("events", counter%2, "event-key", generateEvent())
+        //kafkaTemplate.send("events", counter%2, "event-key", generateEvent())
+        kafkaTemplate.send("events", generateEvent())
         println("Message sent")
     }
 
