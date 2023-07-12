@@ -13,6 +13,9 @@ import reactor.core.publisher.Sinks
 @RestController
 @RequestMapping("/api")
 class EventController {
+    //Sinks.Many ist wie Flux ein Publisher. Der Unterschied ist, dass Sinks.Many gleichzeitig mehrere Subscriber haben
+    //kann. Außerdem ist Sinks.Many mutable, es können also zu jeder Zeit neue Werte hinzugefügt werden, selbst nachdem
+    //Clients subscribed haben
     private var sink: Sinks.Many<Event> = Sinks.many().multicast().onBackpressureBuffer()
 
     @KafkaListener(topics = ["events"])
