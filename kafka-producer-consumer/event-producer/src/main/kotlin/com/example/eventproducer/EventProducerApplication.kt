@@ -1,5 +1,6 @@
 package com.example.eventproducer
 
+import com.example.eventproducer.configuration.Event
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -21,11 +22,9 @@ class EventProducerApplication(private val kafkaTemplate: KafkaTemplate<String, 
     }
 
     fun generateEvent() : String {
-        val event = object {
-            val eventType = "update"
-            val eventData = "Message_${counter++}"
-            val users = listOf("0001", "0002", "0003")
-        }
+        val event = if (counter % 2 == 0)
+            Event("task_completed", "Message_${counter++}", listOf("0001", "0002", "0003")) else
+            Event("task_deleted", "Message_${counter++}", listOf("0001", "0002", "0003"))
         return ObjectMapper().writeValueAsString(event)
     }
 

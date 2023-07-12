@@ -11,7 +11,7 @@ class EventServiceApplication {
     @KafkaListener(topics = ["events"])
     fun handleTopic1(event: String) {
         val jsonNode = ObjectMapper().readTree(event)
-        println(jsonNode.get("eventData").asText())
+        println(jsonNode.get("eventType").asText() + ": " + jsonNode.get("eventData").asText())
     }
 
 }
