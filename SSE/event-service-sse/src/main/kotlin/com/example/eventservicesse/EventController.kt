@@ -16,13 +16,14 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Sinks
+import java.time.Duration
 
 @RestController
 @RequestMapping("/api")
 class EventController {
 
-    private var sink: Sinks.Many<Event> = Sinks.many().multicast().onBackpressureBuffer()
-
+    //https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Sinks.MulticastReplaySpec.html#limit-java.time.Duration-
+    private var sink: Sinks.Many<Event> = Sinks.many().replay().limit(Duration.ZERO)
     private val jwtVerifier = JWT.require(Algorithm.HMAC256("bachelor")).build()
 
     @KafkaListener(topics = ["events"])
@@ -42,7 +43,6 @@ class EventController {
 
         //stream push-notifications
         val userId = decodedJWT.getClaim("sub").asString()
-        if (sink.currentSubscriberCount() == 0) sink = Sinks.many().multicast().onBackpressureBuffer()
         return ResponseEntity.status(HttpStatus.OK).body(
             sink.asFlux()
                 .filter { event -> event.users.contains(userId) }
@@ -53,12 +53,6 @@ class EventController {
 
 }
 
-/*
-    Sinks.Many ist wie Flux ein Publisher. Der Unterschied ist, dass Sinks.Many gleichzeitig mehrere Subscriber haben
-    kann. Außerdem ist Sinks.Many mutable, es können also zu jeder Zeit neue Werte hinzugefügt werden, selbst nachdem
-    Clients subscribed haben
-
-    Wenn die Anzahl der sink-Subscriber (Clients, die über diesen Endpunkt Benachrichtigungen erhalten) auf 0
-    sinkt, funktioniert der Sink irgendwie nicht mehr richtig (erneute Client-Verbindungen werden nach dem
-    Öffnen sofort wieder geschlossen). Deshalb wird als Workaround der sink einfach neu initialisiert.
- */
+//Sinks.Many ist wie Flux ein Publisher. Der Unterschied ist, dass Sinks.Many gleichzeitig mehrere Subscriber haben
+//kann. Außerdem ist Sinks.Many mutable, es können also zu jeder Zeit neue Werte hinzugefügt werden, selbst nachdem
+//Clients subscribed haben
