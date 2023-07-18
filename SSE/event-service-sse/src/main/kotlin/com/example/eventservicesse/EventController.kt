@@ -23,6 +23,8 @@ import java.time.Duration
 class EventController {
 
     //https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Sinks.MulticastReplaySpec.html#limit-java.time.Duration-
+    //Sinks.many().replay().limit(Duration.ZERO) erzeugt einen Sink, der neuen Subscribern keine Daten nachreicht.
+    //Subscriber erhalten nur Daten, die der Sink nach der Subscription erhalten hat.
     private var sink: Sinks.Many<Event> = Sinks.many().replay().limit(Duration.ZERO)
     private val jwtVerifier = JWT.require(Algorithm.HMAC256("bachelor")).build()
 
