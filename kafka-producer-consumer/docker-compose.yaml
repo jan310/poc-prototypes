@@ -11,7 +11,7 @@ services:
     image: confluentinc/cp-kafka:latest
     container_name: kafka-broker
     ports:
-      - "9092:9092"
+      - 9092:9092
     depends_on:
       - zookeeper
     environment:
@@ -24,7 +24,8 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
         
   event-producer:
-    image: jan310/event-producer:latest
+    image: event-producer
+    build: ./event-producer/
     container_name: event-producer
     depends_on:
       - kafka-broker

@@ -7,7 +7,7 @@ services:
     volumes:
       - ./mqtt:/mosquitto/config
     ports:
-      - "1883:1883"
+      - 1883:1883
 
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
@@ -20,7 +20,7 @@ services:
     image: confluentinc/cp-kafka:latest
     container_name: kafka-broker
     ports:
-      - "9092:9092"
+      - 9092:9092
     depends_on:
       - zookeeper
     environment:
@@ -33,13 +33,15 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
         
   event-producer:
-    image: jan310/event-producer:latest
+    image: event-producer
+    build: ../kafka-producer-consumer/event-producer/
     container_name: event-producer
     depends_on:
       - kafka-broker
       
   event-service-mqtt:
-    image: jan310/event-service-mqtt:latest
+    image: event-service-mqtt
+    build: ./event-service-mqtt/
     container_name: event-service-mqtt
     depends_on:
       - mqtt-broker

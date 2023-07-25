@@ -1,5 +1,12 @@
 version: '3'
 services:
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - 27017:27017
+
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     container_name: zookeeper
@@ -11,7 +18,7 @@ services:
     image: confluentinc/cp-kafka:latest
     container_name: kafka-broker
     ports:
-      - "9092:9092"
+      - 9092:9092
     depends_on:
       - zookeeper
     environment:
@@ -24,15 +31,17 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
         
   event-producer:
-    image: jan310/event-producer:latest
+    image: event-producer
+    build: ../kafka-producer-consumer/event-producer/
     container_name: event-producer
     depends_on:
       - kafka-broker
       
   event-service-rsocket:
-    image: jan310/event-service-rsocket:latest
+    image: event-service-rsocket
+    build: ./event-service-rsocket/
     container_name: event-service-rsocket
     ports:
-      - "80:80"
+      - 80:80
     depends_on:
       - event-producer
