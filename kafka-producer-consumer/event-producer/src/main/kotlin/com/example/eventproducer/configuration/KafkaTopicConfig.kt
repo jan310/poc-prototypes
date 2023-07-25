@@ -18,7 +18,7 @@ class KafkaTopicConfig(private val env: Environment) {
 
     @Bean
     fun topic() : NewTopic {
-        return NewTopic("events", 2, 1)
+        return NewTopic("events", 1, 1)
     }
 
 }

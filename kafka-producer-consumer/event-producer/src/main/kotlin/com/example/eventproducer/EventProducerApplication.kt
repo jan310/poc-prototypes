@@ -24,7 +24,7 @@ class EventProducerApplication(private val kafkaTemplate: KafkaTemplate<String, 
     fun generateEvent() : String {
         val event = if (counter % 2 == 0)
             Event("task_completed", "Message_${counter++}", listOf("0001", "0002", "0003")) else
-            Event("task_deleted", "Message_${counter++}", listOf("0001", "0002", "0003"))
+            Event("task_deleted", "Message_${counter++}", listOf("0001"))
         return ObjectMapper().writeValueAsString(event)
     }
 
