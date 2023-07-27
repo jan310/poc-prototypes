@@ -8,6 +8,6 @@ data class Event(
     @JsonProperty("users") val users: List<String>
 ) {
     fun toPushNotification(): PushNotification {
-        return PushNotification(eventType, eventData)
+        return PushNotification(System.currentTimeMillis(), eventType, eventData)
     }
 }
