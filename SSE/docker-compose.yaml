@@ -45,3 +45,13 @@ services:
       - 8080:8080
     depends_on:
       - event-producer
+  
+  catch-up-service-sse:
+    image: catch-up-service-sse
+    build: ./catch-up-service-sse/
+    container_name: catch-up-service-sse
+    ports:
+      - 8081:8080
+    depends_on:
+      - mongodb
+      - event-producer
