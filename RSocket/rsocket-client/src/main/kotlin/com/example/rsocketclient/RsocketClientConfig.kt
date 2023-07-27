@@ -27,8 +27,8 @@ class RsocketClientConfig {
             }
             .dataMimeType(MimeTypeUtils.APPLICATION_JSON)
             .websocket(URI(
-                //"ws://localhost:80/rsocket"
-                "ws://localhost:81/rsocket"
+                "ws://localhost:80/rsocket"
+                //"ws://localhost:81/rsocket"
             ))
     }
 

@@ -15,23 +15,23 @@ class RsocketClientApplication(private val rSocketRequester: RSocketRequester) {
 
     @Bean
     fun test() {
-        //testRequestStream()
-        //testChannel()
-        testCatchUpService()
+        //testEventServiceRequestStream()
+        testEventServiceChannel()
+        //testCatchUpService()
     }
 
-    fun testRequestStream() {
+    fun testEventServiceRequestStream() {
         val requestPayload1 = RequestPayload1(jwt, listOf("task_completed", "task_deleted"))
 
         rSocketRequester
-            .route("request-stream")
+            .route("event-service-request-stream")
             .data(ObjectMapper().writeValueAsString(requestPayload1))
             .retrieveFlux(String::class.java)
             .doOnNext { println(it) }
             .subscribe()
     }
 
-    fun testChannel() {
+    fun testEventServiceChannel() {
         val requestPayload1Stream = Flux.just(
             RequestPayload1(jwt, listOf("task_completed", "task_deleted")),
             RequestPayload1(jwt, listOf("task_completed")),
@@ -39,7 +39,7 @@ class RsocketClientApplication(private val rSocketRequester: RSocketRequester) {
         ).delayElements(Duration.ofSeconds(6))
 
         rSocketRequester
-            .route("channel")
+            .route("event-service-channel")
             .data(requestPayload1Stream.map { ObjectMapper().writeValueAsString(it) })
             .retrieveFlux(String::class.java)
             .doOnNext { println(it) }

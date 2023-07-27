@@ -25,7 +25,7 @@ class EventController {
         sink.tryEmitNext(eventObject)
     }
 
-    @MessageMapping(value = ["request-stream"])
+    @MessageMapping(value = ["event-service-request-stream"])
     fun requestStream(@Payload payload: String): Flux<String> {
         val requestPayloadObject = objectMapper.readValue(payload, RequestPayload::class.java)
 
@@ -42,7 +42,7 @@ class EventController {
             .map { event -> objectMapper.writeValueAsString(event.toPushNotification()) }
     }
 
-    @MessageMapping(value = ["channel"])
+    @MessageMapping(value = ["event-service-channel"])
     fun channel(@Payload payload: Flux<String>): Flux<String> {
         return payload.switchMap { lastPayload ->
             val lastPayloadObject = objectMapper.readValue(lastPayload, RequestPayload::class.java)
