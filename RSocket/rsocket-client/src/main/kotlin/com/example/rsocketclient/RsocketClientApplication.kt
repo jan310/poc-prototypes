@@ -16,30 +16,41 @@ class RsocketClientApplication(private val rSocketRequester: RSocketRequester) {
     @Bean
     fun test() {
         //testRequestStream()
-        testChannel()
+        //testChannel()
+        testCatchUpService()
     }
 
     fun testRequestStream() {
-        val requestPayload = RequestPayload(jwt, listOf("task_completed", "task_deleted"))
+        val requestPayload1 = RequestPayload1(jwt, listOf("task_completed", "task_deleted"))
 
         rSocketRequester
             .route("request-stream")
-            .data(ObjectMapper().writeValueAsString(requestPayload))
+            .data(ObjectMapper().writeValueAsString(requestPayload1))
             .retrieveFlux(String::class.java)
             .doOnNext { println(it) }
             .subscribe()
     }
 
     fun testChannel() {
-        val requestPayloadStream = Flux.just(
-            RequestPayload(jwt, listOf("task_completed", "task_deleted")),
-            RequestPayload(jwt, listOf("task_completed")),
-            RequestPayload(jwt, listOf("task_deleted"))
+        val requestPayload1Stream = Flux.just(
+            RequestPayload1(jwt, listOf("task_completed", "task_deleted")),
+            RequestPayload1(jwt, listOf("task_completed")),
+            RequestPayload1(jwt, listOf("task_deleted"))
         ).delayElements(Duration.ofSeconds(6))
 
         rSocketRequester
             .route("channel")
-            .data(requestPayloadStream.map { ObjectMapper().writeValueAsString(it) })
+            .data(requestPayload1Stream.map { ObjectMapper().writeValueAsString(it) })
+            .retrieveFlux(String::class.java)
+            .doOnNext { println(it) }
+            .subscribe()
+    }
+
+    fun testCatchUpService() {
+        val requestPayload2 = RequestPayload2(jwt, 1690481238017, listOf("task_completed", "task_deleted"))
+        rSocketRequester
+            .route("catch-up-service")
+            .data(ObjectMapper().writeValueAsString(requestPayload2))
             .retrieveFlux(String::class.java)
             .doOnNext { println(it) }
             .subscribe()

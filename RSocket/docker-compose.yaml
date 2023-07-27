@@ -45,3 +45,13 @@ services:
       - 80:80
     depends_on:
       - event-producer
+      
+  catch-up-service-rsocket:
+    image: catch-up-service-rsocket
+    build: ./catch-up-service-rsocket/
+    container_name: catch-up-service-rsocket
+    ports:
+      - 81:80
+    depends_on:
+      - mongodb
+      - event-producer
