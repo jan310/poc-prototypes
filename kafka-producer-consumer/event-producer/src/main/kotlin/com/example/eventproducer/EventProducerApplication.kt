@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled
 class EventProducerApplication(private val kafkaTemplate: KafkaTemplate<String, String>) {
 
     var counter = 0
+    val objectMapper = ObjectMapper()
 
     @Scheduled(fixedRate = 1000)
     fun publishEvent() {
@@ -25,7 +26,7 @@ class EventProducerApplication(private val kafkaTemplate: KafkaTemplate<String, 
         val event = if (counter % 2 == 0)
             Event("task_completed", "Message_${counter++}", listOf("0001", "0002", "0003")) else
             Event("task_deleted", "Message_${counter++}", listOf("0001"))
-        return ObjectMapper().writeValueAsString(event)
+        return objectMapper.writeValueAsString(event)
     }
 
 }
