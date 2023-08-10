@@ -1,6 +1,7 @@
 package com.example.eventservicesse
 
 import com.auth0.jwt.JWT
+import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -22,39 +23,39 @@ import java.time.Duration
 @RequestMapping("/api")
 class EventController {
 
-    //https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Sinks.MulticastReplaySpec.html#limit-java.time.Duration-
-    //Sinks.many().replay().limit(Duration.ZERO) erzeugt einen Sink, der neuen Subscribern keine Daten nachreicht.
-    //Subscriber erhalten nur Daten, die der Sink nach der Subscription erhalten hat.
-    private var sink: Sinks.Many<Event> = Sinks.many().replay().limit(Duration.ZERO)
-    private val jwtVerifier = JWT.require(Algorithm.HMAC256("bachelor")).build()
+    val objectMapper = ObjectMapper()
+    val sink: Sinks.Many<Event> = Sinks.many().replay().limit(Duration.ZERO)
+    val jwtVerifier: JWTVerifier = JWT.require(Algorithm.HMAC256("bachelor")).build()
 
     @KafkaListener(topics = ["events"])
     fun handleTopic1(event: String) {
-        val eventObject = ObjectMapper().readValue(event, Event::class.java)
+        val eventObject = objectMapper.readValue(event, Event::class.java)
         sink.tryEmitNext(eventObject)
     }
 
     @PostMapping(value = ["/events"], produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
-    fun getEvents(@RequestHeader authorization: String, @RequestBody requestPayload: RequestPayload): ResponseEntity<Flux<ServerSentEvent<PushNotification>>?> {
-        //verify and decode the JWT
+    fun getEvents(
+        @RequestHeader authorization: String,
+        @RequestBody requestPayload: RequestPayload
+    ): ResponseEntity<Flux<ServerSentEvent<PushNotification>>?> {
         val decodedJWT = try {
             jwtVerifier.verify(authorization)
         } catch (e: JWTVerificationException) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         }
-
-        //stream push-notifications
         val userId = decodedJWT.getClaim("sub").asString()
         return ResponseEntity.status(HttpStatus.OK).body(
             sink.asFlux()
                 .filter { event -> event.users.contains(userId) }
-                .filter { event -> requestPayload.topics.contains(event.eventType) }
-                .map { event -> ServerSentEvent.builder(event.toPushNotification()).event(event.eventType).build() }
+                .filter { event -> requestPayload.eventTypes.contains(event.eventType) }
+                .map { event ->
+                    ServerSentEvent.builder(event.toPushNotification()).event(event.eventType).build()
+                }
         )
     }
 
 }
 
 //Sinks.Many ist wie Flux ein Publisher. Der Unterschied ist, dass Sinks.Many gleichzeitig mehrere Subscriber haben
-//kann. Außerdem ist Sinks.Many mutable, es können also zu jeder Zeit neue Werte hinzugefügt werden, selbst nachdem
-//Clients subscribed haben
+//kann. Außerdem ist Sinks.Many mutable, es können also zu jeder Zeit neue Werte zum Stream hinzugefügt werden, selbst
+//nachdem Clients subscribed haben
