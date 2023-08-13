@@ -1,6 +1,7 @@
 package com.example.catchupservicesse
 
 import com.auth0.jwt.JWT
+import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -19,30 +20,32 @@ import reactor.core.publisher.Flux
 @RequestMapping("/api")
 class EventController(private val eventRepository: EventRepository) {
 
-    private val jwtVerifier = JWT.require(Algorithm.HMAC256("bachelor")).build()
+    val objectMapper = ObjectMapper()
+    val jwtVerifier: JWTVerifier = JWT.require(Algorithm.HMAC256("bachelor")).build()
 
     @KafkaListener(topics = ["events"])
     fun handleTopic1(event: String) {
-        val eventObject = ObjectMapper().readValue(event, Event::class.java)
-        eventRepository.save(eventObject.toEventEntity()).doOnNext { println(it.id) }.subscribe()
+        val eventObject = objectMapper.readValue(event, Event::class.java)
+        eventRepository.save(eventObject.toEventEntity()).subscribe()
     }
 
     @PostMapping(value = ["/events"], produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
-    fun getEvents(@RequestHeader authorization: String, @RequestBody requestPayload: RequestPayload): ResponseEntity<Flux<PushNotification>?> {
+    fun getEvents(
+        @RequestHeader authorization: String,
+        @RequestBody requestPayload: RequestPayload
+    ): ResponseEntity<Flux<PushNotification>?> {
         val decodedJWT = try {
             jwtVerifier.verify(authorization)
         } catch (e: JWTVerificationException) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         }
-
         val userId = decodedJWT.getClaim("sub").asString()
-
         return ResponseEntity.status(HttpStatus.OK).body(
             eventRepository.findByTimestampGreaterThanAndUsersContainingAndEventTypeIn(
-                requestPayload.timestamp,
-                userId,
-                requestPayload.topics
-            ).map { it.toPushNotification() }
+                timestamp = requestPayload.timestamp,
+                user = userId,
+                eventTypes = requestPayload.eventTypes
+            ).map { eventEntity -> eventEntity.toPushNotification() }
         )
     }
 

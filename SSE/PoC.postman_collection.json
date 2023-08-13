@@ -1,0 +1,86 @@
+{
+	"info": {
+		"_postman_id": "b258325a-6bef-491d-aa11-8a801d8fa7cc",
+		"name": "PoC",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19961340"
+	},
+	"item": [
+		{
+			"name": "event-service",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzZXJ2ZXIiLCJzdWIiOiIwMDAxIiwiZXhwIjoxNjk3MjU3ODcyLCJ0b3BpY3MiOlsidGFza19jb21wbGV0ZWQiLCJ0YXNrX2RlbGV0ZWQiXX0.QaHJEwc4O_slvxtRhn6syBqMssmA9B_Eml_zdzgCg-Y",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"eventTypes\": [\"task_completed\", \"task_deleted\"]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/events",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"events"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "catch-up-service",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzZXJ2ZXIiLCJzdWIiOiIwMDAxIiwiZXhwIjoxNjk3MjU3ODcyLCJ0b3BpY3MiOlsidGFza19jb21wbGV0ZWQiLCJ0YXNrX2RlbGV0ZWQiXX0.QaHJEwc4O_slvxtRhn6syBqMssmA9B_Eml_zdzgCg-Y",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"timestamp\": 1690276486156,\r\n    \"eventTypes\": [\"task_completed\"]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/api/events",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"events"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
