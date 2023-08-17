@@ -5,6 +5,7 @@ import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -24,9 +25,12 @@ class EventController(private val eventRepository: EventRepository) {
     val jwtVerifier: JWTVerifier = JWT.require(Algorithm.HMAC256("bachelor")).build()
 
     @KafkaListener(topics = ["events"])
-    fun handleTopic1(event: String) {
+    fun handleTopic1(consumerRecord: ConsumerRecord<String,String>) {
+        val partition = consumerRecord.partition()
+        val offset = consumerRecord.offset()
+        val event = consumerRecord.value()
         val eventObject = objectMapper.readValue(event, Event::class.java)
-        eventRepository.save(eventObject.toEventEntity()).subscribe()
+        eventRepository.save(eventObject.toEventEntity(partition, offset)).subscribe()
     }
 
     @PostMapping(value = ["/events"], produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
@@ -40,13 +44,18 @@ class EventController(private val eventRepository: EventRepository) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         }
         val userId = decodedJWT.getClaim("sub").asString()
-        return ResponseEntity.status(HttpStatus.OK).body(
-            eventRepository.findByTimestampGreaterThanAndUsersContainingAndEventTypeIn(
-                timestamp = requestPayload.timestamp,
-                user = userId,
-                eventTypes = requestPayload.eventTypes
-            ).map { eventEntity -> eventEntity.toPushNotification() }
-        )
+        val pushNotifications = mutableListOf<Flux<PushNotification>>()
+        requestPayload.lastOffsets.forEach { lastOffset ->
+            pushNotifications.add(
+                eventRepository.findByUsersContainingAndEventTypeInAndPartitionAndOffsetGreaterThan(
+                    user = userId,
+                    eventTypes = requestPayload.eventTypes,
+                    partition = lastOffset.partition,
+                    offset = lastOffset.offset
+                ).map { eventEntity -> eventEntity.toPushNotification() }
+            )
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(Flux.concat(pushNotifications))
     }
 
 }

@@ -7,10 +7,11 @@ import reactor.core.publisher.Flux
 @Repository
 interface EventRepository: ReactiveMongoRepository<EventEntity,String> {
 
-    fun findByTimestampGreaterThanAndUsersContainingAndEventTypeIn(
-        timestamp: Long,
+    fun findByUsersContainingAndEventTypeInAndPartitionAndOffsetGreaterThan(
         user: String,
-        eventTypes: List<String>
+        eventTypes: List<String>,
+        partition: Int,
+        offset: Long
     ): Flux<EventEntity>
 
 }
