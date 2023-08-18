@@ -15,9 +15,9 @@ class RsocketClientApplication(private val rSocketRequester: RSocketRequester) {
 
     @Bean
     fun test() {
-        //testEventServiceRequestStream()
-        testEventServiceChannel()
-        //testCatchUpService()
+        //testEventServiceRequestStream() //In RsocketClientConfig.kt Port: 80
+        testEventServiceChannel()       //In RsocketClientConfig.kt Port: 80
+        //testCatchUpService()              //In RsocketClientConfig.kt Port: 81
     }
 
     fun testEventServiceRequestStream() {
@@ -47,7 +47,11 @@ class RsocketClientApplication(private val rSocketRequester: RSocketRequester) {
     }
 
     fun testCatchUpService() {
-        val requestPayload2 = RequestPayload2(jwt, 1690481238017, listOf("task_completed", "task_deleted"))
+        val requestPayload2 = RequestPayload2(
+            jwt = jwt,
+            eventTypes = listOf("task_completed", "task_deleted"),
+            lastOffsets = listOf(PartitionOffset(0,20))
+        )
         rSocketRequester
             .route("catch-up-service")
             .data(ObjectMapper().writeValueAsString(requestPayload2))
