@@ -7,13 +7,14 @@ data class Event(
     @JsonProperty("eventData") val eventData: String,
     @JsonProperty("users") val users: List<String>
 ) {
-    fun toEventEntity(): EventEntity {
+    fun toEventEntity(partition: Int, offset: Long): EventEntity {
         return EventEntity(
             id = null,
-            timestamp = System.currentTimeMillis(),
             eventType = eventType,
             eventData = eventData,
-            users = users
+            users = users,
+            partition = partition,
+            offset = offset
         )
     }
 }

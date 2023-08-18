@@ -7,12 +7,13 @@ import org.springframework.data.mongodb.core.mapping.Document
 data class EventEntity(
     @Id
     val id: String?,
-    val timestamp: Long,
     val eventType: String,
     val eventData: String,
-    val users: List<String>
+    val users: List<String>,
+    val partition: Int,
+    val offset: Long
 ) {
     fun toPushNotification(): PushNotification {
-        return PushNotification(timestamp, eventType, eventData)
+        return PushNotification(eventType, eventData, partition, offset)
     }
 }
