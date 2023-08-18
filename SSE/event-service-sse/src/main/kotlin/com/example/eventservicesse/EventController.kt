@@ -31,11 +31,9 @@ class EventController {
 
     @KafkaListener(topics = ["events"])
     fun handleTopic1(consumerRecord: ConsumerRecord<String, String>) {
-        val partition = consumerRecord.partition()
-        val offset = consumerRecord.offset()
         val eventObjectNode = objectMapper.readTree(consumerRecord.value()) as ObjectNode
-        eventObjectNode.put("partition", partition)
-        eventObjectNode.put("offset", offset)
+        eventObjectNode.put("partition", consumerRecord.partition())
+        eventObjectNode.put("offset", consumerRecord.offset())
         val event = objectMapper.convertValue(eventObjectNode, Event::class.java)
         sink.tryEmitNext(event)
     }
