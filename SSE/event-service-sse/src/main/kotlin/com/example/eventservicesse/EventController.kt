@@ -5,6 +5,8 @@ import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ObjectNode
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -28,9 +30,14 @@ class EventController {
     val jwtVerifier: JWTVerifier = JWT.require(Algorithm.HMAC256("bachelor")).build()
 
     @KafkaListener(topics = ["events"])
-    fun handleTopic1(event: String) {
-        val eventObject = objectMapper.readValue(event, Event::class.java)
-        sink.tryEmitNext(eventObject)
+    fun handleTopic1(consumerRecord: ConsumerRecord<String, String>) {
+        val partition = consumerRecord.partition()
+        val offset = consumerRecord.offset()
+        val eventObjectNode = objectMapper.readTree(consumerRecord.value()) as ObjectNode
+        eventObjectNode.put("partition", partition)
+        eventObjectNode.put("offset", offset)
+        val event = objectMapper.convertValue(eventObjectNode, Event::class.java)
+        sink.tryEmitNext(event)
     }
 
     @PostMapping(value = ["/events"], produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
