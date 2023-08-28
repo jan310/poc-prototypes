@@ -60,7 +60,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"timestamp\": 1690276486156,\r\n    \"eventTypes\": [\"task_completed\"]\r\n}",
+					"raw": "{\r\n  \"eventTypes\": [\"task_completed\", \"task_deleted\"],\r\n  \"lastOffsets\": [\r\n    {\"partition\": 0, \"offset\": 21}\r\n  ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
