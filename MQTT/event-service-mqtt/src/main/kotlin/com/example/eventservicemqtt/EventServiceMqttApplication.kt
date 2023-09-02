@@ -11,18 +11,16 @@ import org.springframework.kafka.annotation.KafkaListener
 @SpringBootApplication
 class EventServiceMqttApplication(private val mqttAsyncClient: MqttAsyncClient) {
 
+    val objectMapper = ObjectMapper()
+
     @KafkaListener(topics = ["events"])
     fun handleTopic1(event: String) {
-        val objectMapper = ObjectMapper()
         val eventObject = objectMapper.readValue(event, Event::class.java)
-
         val message = MqttMessage(objectMapper.writeValueAsBytes(eventObject.toPushNotification()))
         message.qos = 2
-
         val mqttProperties = MqttProperties()
         mqttProperties.messageExpiryInterval = 3600
         message.properties = mqttProperties
-
         mqttAsyncClient.publish(eventObject.eventType, message)
     }
 
