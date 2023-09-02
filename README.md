@@ -7,3 +7,5 @@ Dafür ist in diesem Repository eine Postman-Collection vorhanden, die in Postma
 Um die RSocket-Prototypen zu testen kann die selbstimplementierte Testanwendung "rsocket-client" verwendet werden.
 
 Um den MQTT-Prototyp zu testen kann ein kosteloser MQTT-Client wie MQTT.fx (https://softblade.de/download/) verwendet werden.
+
+Falls noch etwas unklar sein sollte können Sie mir gerne eine Email schreiben.
