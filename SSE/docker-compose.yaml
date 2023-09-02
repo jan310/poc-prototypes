@@ -31,15 +31,13 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
         
   event-producer:
-    image: event-producer
-    build: ../kafka-producer-consumer/event-producer/
+    image: jan310/event-producer
     container_name: event-producer
     depends_on:
       - kafka-broker
       
   event-service-sse:
-    image: event-service-sse
-    build: ./event-service-sse/
+    image: jan310/event-service-sse
     container_name: event-service-sse
     ports:
       - 8080:8080
@@ -47,8 +45,7 @@ services:
       - event-producer
   
   catch-up-service-sse:
-    image: catch-up-service-sse
-    build: ./catch-up-service-sse/
+    image: jan310/catch-up-service-sse
     container_name: catch-up-service-sse
     ports:
       - 8081:8080

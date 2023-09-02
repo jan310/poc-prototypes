@@ -24,8 +24,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
         
   event-producer:
-    image: event-producer
-    build: ./event-producer/
+    image: jan310/event-producer
     container_name: event-producer
     depends_on:
       - kafka-broker

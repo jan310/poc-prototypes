@@ -33,15 +33,13 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
         
   event-producer:
-    image: event-producer
-    build: ../kafka-producer-consumer/event-producer/
+    image: jan310/event-producer
     container_name: event-producer
     depends_on:
       - kafka-broker
       
   event-service-mqtt:
-    image: event-service-mqtt
-    build: ./event-service-mqtt/
+    image: jan310/event-service-mqtt
     container_name: event-service-mqtt
     depends_on:
       - mqtt-broker
